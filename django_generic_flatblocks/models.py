@@ -10,7 +10,7 @@ class GenericFlatblock(models.Model):
     content_type = models.ForeignKey(ContentType)
     object_id = models.PositiveIntegerField()
     content_object = generic.GenericForeignKey('content_type', 'object_id')
-    exclude_fields = JSONField(_('fields display in template'),blank=True,null=True)
+    #exclude_fields = JSONField(_('fields display in template'),blank=True,null=True)
 
     def __unicode__(self):
         return self.slug
@@ -31,7 +31,7 @@ class GenericFlatblockList(models.Model):
     def object_list(self):
         model = self.content_type.model_class()
         if self.query_args:
-            return model.objects.filter(self.query_args)
+            return model.objects.filter(**self.query_args)
         return model.objects.all()
 
 
