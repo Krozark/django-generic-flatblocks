@@ -1,7 +1,7 @@
+ # -*- coding: utf-8 -*-
 import os
 
-PROJECT_ROOT = os.path.dirname(os.path.abspath(__file__))
-PROJECT_NAME = os.path.split(PROJECT_ROOT)[-1]
+PROJECT_PATH = os.path.dirname(os.path.abspath(__file__))
 
 # ==============================================================================
 # debug settings
@@ -9,21 +9,6 @@ PROJECT_NAME = os.path.split(PROJECT_ROOT)[-1]
 
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
-INTERNAL_IPS = ()
-if DEBUG:
-    TEMPLATE_STRING_IF_INVALID = ''
-
-# ==============================================================================
-# cache settings
-# ==============================================================================
-
-CACHE_BACKEND = 'locmem://'
-CACHE_MIDDLEWARE_KEY_PREFIX = '%s_' % PROJECT_NAME
-CACHE_MIDDLEWARE_SECONDS = 600
-
-# ==============================================================================
-# email and error-notify settings
-# ==============================================================================
 
 ADMINS = (
     # ('Your Name', 'your_email@example.com'),
@@ -31,53 +16,55 @@ ADMINS = (
 
 MANAGERS = ADMINS
 
-DEFAULT_FROM_EMAIL = 'from-mail@example.com'
-SERVER_EMAIL = 'error-notify@example.com'
-
-EMAIL_SUBJECT_PREFIX = '[%s] ' % PROJECT_NAME
-EMAIL_HOST = 'localhost'
-EMAIL_PORT = 25
-EMAIL_HOST_USER = ''
-EMAIL_HOST_PASSWORD = ''
-EMAIL_USE_TLS = False
-
-# ==============================================================================
-# auth settings
-# ==============================================================================
-
-LOGIN_URL = '/accounts/login/'
-LOGOUT_URL = '/accounts/logout/'
-LOGIN_REDIRECT_URL = '/'
-
-# ==============================================================================
-# database settings
-# ==============================================================================
-
-DATABASE_ENGINE = 'sqlite3'
-DATABASE_NAME = os.path.join(PROJECT_ROOT, 'dev.db')
-DATABASE_USER = ''
-DATABASE_PASSWORD = ''
-DATABASE_HOST = ''
-DATABASE_PORT = ''
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.sqlite3', # Add 'postgresql_psycopg2', 'postgresql', 'mysql', 'sqlite3' or 'oracle'.
+        'NAME': 'dev.db',                      # Or path to database file if using sqlite3.
+        'USER': '',                      # Not used with sqlite3.
+        'PASSWORD': '',                  # Not used with sqlite3.
+        'HOST': '',                      # Set to empty string for localhost. Not used with sqlite3.
+        'PORT': '',                      # Set to empty string for default. Not used with sqlite3.
+    }
+}
 
 # ==============================================================================
 # i18n and url settings
 # ==============================================================================
+TIME_ZONE = 'Europe/Paris'
 
-TIME_ZONE = 'Europe/Berlin'
-LANGUAGE_CODE = 'de'
-LANGUAGES = (('en', 'English'),
-             ('de', 'German'))
-USE_I18N = True
+# Language code for this installation. All choices can be found here:
+# http://www.i18nguy.com/unicode/language-identifiers.html
+LANGUAGE_CODE = 'fr'
+
+gettext = lambda s:s
+LANGUAGES = (
+        ('en',gettext(u'English')),
+        ('fr',gettext(u'Français')),
+)
 
 SITE_ID = 1
 
-MEDIA_ROOT = os.path.join(PROJECT_ROOT, 'site_media')
+USE_I18N = True
+USE_L10N = True
+
+MEDIA_ROOT = os.path.join(PROJECT_PATH,'public/mymedia/')
 MEDIA_URL = '/media/'
-ADMIN_MEDIA_PREFIX = '/django_admin_media/'
 
-ROOT_URLCONF = '%s.urls' % PROJECT_NAME
+STATIC_ROOT = os.path.join(PROJECT_PATH,'public/static')
+STATIC_URL = '/static/'
 
+ADMIN_MEDIA_PREFIX = '/static/admin/'
+#ADMIN_MEDIA_PREFIX = '/static/grappelli/'
+JCHAT_MEDIA_PREFIX = '/static/jchat/'
+
+# Additional locations of static files
+STATICFILES_DIRS = (
+    #os.path.join(PROJECT_PATH, '../contrib/grappelli/static/'),
+    #os.path.join(PROJECT_PATH, '../contrib/grappelli/templates/'),
+
+    os.path.join(PROJECT_PATH, 'jchat/static/'),
+
+)
 # ==============================================================================
 # application and middleware settings
 # ==============================================================================
@@ -88,69 +75,67 @@ INSTALLED_APPS = (
     'django.contrib.sessions',
     'django.contrib.sites',
     'django.contrib.admin',
-    'django.contrib.humanize',
-    'django.contrib.webdesign',
+    #'django.contrib.humanize',
+    #'django.contrib.webdesign',
     'django_generic_flatblocks',
     'django_generic_flatblocks.contrib.gblocks',
 )
 
+STATICFILES_FINDERS = (
+    'django.contrib.staticfiles.finders.FileSystemFinder',
+    'django.contrib.staticfiles.finders.AppDirectoriesFinder',
+#    'django.contrib.staticfiles.finders.DefaultStorageFinder',
+)
+
 MIDDLEWARE_CLASSES = (
-    'django.contrib.sessions.middleware.SessionMiddleware',
-    'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'django.middleware.http.ConditionalGetMiddleware',
-#    'django.middleware.gzip.GZipMiddleware',
     'django.middleware.common.CommonMiddleware',
+    'django.contrib.sessions.middleware.SessionMiddleware',
+    'django.middleware.csrf.CsrfViewMiddleware',
+    'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'django.contrib.messages.middleware.MessageMiddleware',
+    'django.middleware.locale.LocaleMiddleware',
 )
 
 TEMPLATE_CONTEXT_PROCESSORS = (
-    'django.core.context_processors.auth',
-    'django.core.context_processors.debug',
-    'django.core.context_processors.i18n',
+    'django.contrib.auth.context_processors.auth',
+    #'django.core.context_processors.i18n',
     'django.core.context_processors.media',
+    "django.core.context_processors.static", 
     'django.core.context_processors.request',
+
 )
 
 TEMPLATE_DIRS = (
-    os.path.join(PROJECT_ROOT, 'templates'),
+    os.path.join( PROJECT_PATH,'templates/'),
 )
 
 TEMPLATE_LOADERS = (
-    'django.template.loaders.filesystem.load_template_source',
-    'django.template.loaders.app_directories.load_template_source',
+    'django.template.loaders.filesystem.Loader',
+    'django.template.loaders.app_directories.Loader',
 #    'django.template.loaders.eggs.load_template_source',
 )
-
+ROOT_URLCONF = 'urls'
 # ==============================================================================
 # the secret key
 # ==============================================================================
+from random import choice
+SECRET_KEY = ''.join([choice('abcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*(-_=+)') for i in range(50)])
 
-try:
-    SECRET_KEY
-except NameError:
-    SECRET_FILE = os.path.join(PROJECT_ROOT, 'secret.txt')
-    try:
-        SECRET_KEY = open(SECRET_FILE).read().strip()
-    except IOError:
-        try:
-            from random import choice
-            SECRET_KEY = ''.join([choice('abcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*(-_=+)') for i in range(50)])
-            secret = file(SECRET_FILE, 'w')
-            secret.write(SECRET_KEY)
-            secret.close()
-        except IOError:
-            Exception('Please create a %s file with random characters to generate your secret key!' % SECRET_FILE)
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'mail_admins': {
+            'level': 'ERROR',
+            'class': 'django.utils.log.AdminEmailHandler'
+        }
+    },
+    'loggers': {
+        'django.request': {
+            'handlers': ['mail_admins'],
+            'level': 'ERROR',
+            'propagate': True,
+        },
+    }
+}
 
-# ==============================================================================
-# third party
-# ==============================================================================
-
-# ..third party app settings here
-
-# ==============================================================================
-# host specific settings
-# ==============================================================================
-
-try:
-    from local_settings import *
-except ImportError:
-    pass
