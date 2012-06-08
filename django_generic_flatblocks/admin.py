@@ -49,6 +49,9 @@ admin.site.register(GenericFlatblock, GenericFlatblockAdmin)
 
 class GenericFlatblockListAdmin(admin.ModelAdmin):
 
-    list_display = ('model','slug')
+    list_display = ('modelname','slug')
+
+    def modelname(self,obj):
+        return "%s" % self.model
 
 admin.site.register(GenericFlatblockList, GenericFlatblockListAdmin)
