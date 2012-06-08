@@ -19,7 +19,7 @@ class GenericFlatblockList(models.Model):
     slug = models.SlugField(_('slug'), max_length=255, unique=True)
     content_type = models.ForeignKey(ContentType)
     display_fields = JSONField(_('fields display in template'))
-    query_args= = JSONField(_('custom query args'))
+    query_args = JSONField(_('custom query args'))
 
     def __unicode__(self):
         return self.slug
