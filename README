@@ -12,18 +12,19 @@ django-generic-flatblocks solves this problem as it knows nothing about the
 content itself. You *attach* your hand made content node (a simple model) where
 you can define any fields you want.
 
-.. _`django-flatblocks`: http://github.com/zerok/django-flatblocks/tree/master
-.. _`django-chunks`: http://code.google.com/p/django-chunks/
 
-Documentation
-=============
-
-Documenation is available online under:
-
-    http://docs.mahner.org/django-generic-flatblocks/
 
 Changelog
 =========
+
+-----------------------------
+0.9.5 (backwards compatible):
+-----------------------------
+
+add a generic list that can desplay any model
+exemple:
+
+{% glist "user-list" for "auth.user" with "django_generic_flatblocks/object_list.html" %}
 
 -----------------------------
 0.9.1 (backwards compatible):
