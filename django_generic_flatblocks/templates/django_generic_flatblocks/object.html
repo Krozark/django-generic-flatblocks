@@ -1,7 +1,5 @@
 <ul>
 {% for field, value in object.fields.items %}
-{% if value %}
     <li>{{ field }}:{{ value }}</li>
-{% endif %}
 {% endfor %}
 </ul>

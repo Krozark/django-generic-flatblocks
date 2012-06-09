@@ -36,7 +36,14 @@ class GenericFlatblockList(models.Model):
 
 
     @property
+    def fields(self):
+        if self.exclude_fields:
+            fields = [u.name for u in self.model()._meta.fields if u.name not in self.exclude_fields]
+        else:
+            fields = [u.name for u in self.model()._meta.fields]
+        return fields
+
+    @property
     def serialize(self):
-        fields = [u.name for u in self.model()._meta.fields if u.name not in self.exclude_fields]
-        return serializers.serialize("python", (self.object_list),fields=fields)
+        return serializers.serialize("python", (self.object_list),fields=self.fields)
 

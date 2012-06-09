@@ -4,13 +4,13 @@ from django.template.loader import select_template
 from django.conf import settings
 from django.db.models.loading import get_model
 from django.template.defaultfilters import slugify
-from django_generic_flatblocks.models import GenericFlatblock
+from django_generic_flatblocks.models import GenericFlatblock, GenericFlatblockList
 
 register = Library()
 
-class GenericFlatblockNode(Node):
-    def __init__(self, slug, modelname=None, template_path=None,
-                 variable_name=None, store_in_object=None):
+class GenericFlatblockBaseNode(Node):
+
+    def __init__(self, slug, modelname=None, template_path=None, variable_name=None, store_in_object=None):
         self.slug = slug
         self.modelname = modelname
         self.template_path = template_path
@@ -46,6 +46,23 @@ class GenericFlatblockNode(Node):
         else:
             return None
 
+    def resolve(self, var, context):
+        """Resolves a variable out of context if it's not in quotes"""
+        if var[0] in ('"', "'") and var[-1] == var[0]:
+            return var[1:-1]
+        else:
+            return Variable(var).resolve(context)
+
+    def resolve_model_for_label(self, modelname, context):
+        """resolves a model for a applabel.modelname string"""
+        applabel, modellabel = self.resolve(modelname, context).split(".")
+        related_model = get_model(applabel, modellabel)
+        return related_model
+
+
+class GenericFlatblockNode(GenericFlatblockBaseNode):
+
+
     def get_content_object(self, related_model, slug):
 
         # If the user passed a Integer as a slug, assume that we should fetch
@@ -73,18 +90,7 @@ class GenericFlatblockNode(Node):
             generic_object = GenericFlatblock._default_manager.create(slug=slug, content_object=related_object)
         return generic_object, related_object
 
-    def resolve(self, var, context):
-        """Resolves a variable out of context if it's not in quotes"""
-        if var[0] in ('"', "'") and var[-1] == var[0]:
-            return var[1:-1]
-        else:
-            return Variable(var).resolve(context)
 
-    def resolve_model_for_label(self, modelname, context):
-        """resolves a model for a applabel.modelname string"""
-        applabel, modellabel = self.resolve(modelname, context).split(".")
-        related_model = get_model(applabel, modellabel)
-        return related_model
 
     def render(self, context):
 
@@ -114,7 +120,6 @@ class GenericFlatblockNode(Node):
             template_paths.append(self.resolve(self.template_path, context))
         template_paths.append('%s/%s/flatblock.html' % \
             tuple(self.resolve(self.modelname, context).lower().split(".")))
-
         try:
             t = select_template(template_paths)
         except:
@@ -143,6 +148,7 @@ def do_genericflatblock(parser, token):
         except ValueError:
             return if_none
 
+
     bits = token.contents.split()
     args = {
         'slug': next_bit_for(bits, 'gblock'),
@@ -154,3 +160,87 @@ def do_genericflatblock(parser, token):
     return GenericFlatblockNode(**args)
 
 register.tag('gblock', do_genericflatblock)
+######################################################################
+##################### LIST ###########################################
+######################################################################
+
+
+from django.contrib.contenttypes.models import ContentType
+class GenericFlatblockListNode(GenericFlatblockBaseNode):
+
+
+    def get_content_object(self, related_model, slug):
+
+        # If the user passed a Integer as a slug, assume that we should fetch
+        # this specific object
+        try:
+            generic_object = GenericFlatblockList._default_manager.get(slug=slug)
+        except GenericFlatblockList.DoesNotExist:
+            generic_object = GenericFlatblockList._default_manager.create(slug=slug,content_type=ContentType.objects.get_for_model(related_model))
+        return generic_object
+
+
+
+    def render(self, context):
+
+        slug = self.generate_slug(self.slug, context)
+        related_model = self.resolve_model_for_label(self.modelname, context)
+
+        # Get the generic and related object
+        generic_object = self.get_content_object(related_model, slug)
+
+        # if "into" is provided, store the related object into this variable
+        if self.store_in_object:
+            into_var = self.resolve(self.store_in_object, context)
+            context[into_var] = generic_object
+            return ''
+
+        context['object'] = generic_object
+
+        # Resolve the template(s)
+        template_paths = []
+        if self.template_path:
+            template_paths.append(self.resolve(self.template_path, context))
+        template_paths.append('%s/%s/flatblock.html' % \
+            tuple(self.resolve(self.modelname, context).lower().split(".")))
+
+        try:
+            t = select_template(template_paths)
+        except:
+            if settings.TEMPLATE_DEBUG:
+                raise
+            return ''
+        content = t.render(context)
+
+        # Set content as variable inside context, if variable_name is given
+        if self.variable_name:
+            context[self.resolve(self.variable_name, context)] = content
+            return ''
+        return content
+
+def do_genericflatblocklist(parser, token):
+    """
+    {% glist "slug" for "appname.modelname" %}
+    {% glist "slug" for "appname.modelname" into "slug_object" %}
+    {% glist "slug" for "appname.modelname" with "templatename.html" %}
+    {% glist "slug" for "appname.modelname" with "templatename.html" as "variable" %}
+    """
+
+    def next_bit_for(bits, key, if_none=None):
+        try:
+            return bits[bits.index(key)+1]
+        except ValueError:
+            return if_none
+
+
+    bits = token.contents.split()
+    args = {
+        'slug': next_bit_for(bits, 'glist'),
+        'modelname': next_bit_for(bits, 'for'),
+        'template_path': next_bit_for(bits, 'with'),
+        'variable_name': next_bit_for(bits, 'as'),
+        'store_in_object': next_bit_for(bits, 'into'),
+    }
+    return GenericFlatblockListNode(**args)
+
+register.tag('glist', do_genericflatblocklist)
