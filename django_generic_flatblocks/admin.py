@@ -54,7 +54,7 @@ class GenericFlatblockListAdmin(admin.ModelAdmin):
     form = GenericFlatblockListForm
 
     def modelname(self,obj):
-        return "%s" % self.model
+        return "%s" % obj.content_type
 
 
 admin.site.register(GenericFlatblockList, GenericFlatblockListAdmin)

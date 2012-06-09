@@ -48,7 +48,7 @@
     {% endcomment %}
     {% gblock 1 for "auth.user" with "current_user.html" %}
 
-    {% glist "test-list" for "auth.user" with "django_generic_flatblocks/object_list.html" %}
+    {% glist "test-list" for "gblocks.Text" with "django_generic_flatblocks/object_list.html" %}
     
     {% comment %}
         You can store the related object directly in the context using
