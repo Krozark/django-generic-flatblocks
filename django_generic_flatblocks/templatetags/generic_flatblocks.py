@@ -16,6 +16,13 @@ class GenericFlatblockBaseNode(Node):
         self.template_path = template_path
         self.variable_name = variable_name
         self.store_in_object = store_in_object
+    
+    def GetTemplatesPath(self,context):
+        template_paths = []
+        if self.template_path:
+            template_paths.append(self.resolve(self.template_path, context))
+        template_paths.append('%s/%s.html' % tuple(self.resolve(self.modelname, context).lower().split(".")))
+        return template_paths
 
     def generate_slug(self, slug, context):
         """
@@ -114,18 +121,19 @@ class GenericFlatblockNode(GenericFlatblockBaseNode):
         context['object'] = related_object
         context['admin_url'] = admin_url
 
+
         # Resolve the template(s)
-        template_paths = []
-        if self.template_path:
-            template_paths.append(self.resolve(self.template_path, context))
-        template_paths.append('%s/%s/flatblock.html' % \
-            tuple(self.resolve(self.modelname, context).lower().split(".")))
+        template_paths = self.GetTemplatesPath(context)
+        template_paths.append("django_generic_flatblocks/object.html")
+
         try:
             t = select_template(template_paths)
         except:
             if settings.TEMPLATE_DEBUG:
                 raise
             return ''
+
+        context['object_model_name'] = self.modelname
         content = t.render(context)
 
         # Set content as variable inside context, if variable_name is given
@@ -198,11 +206,8 @@ class GenericFlatblockListNode(GenericFlatblockBaseNode):
         context['object'] = generic_object
 
         # Resolve the template(s)
-        template_paths = []
-        if self.template_path:
-            template_paths.append(self.resolve(self.template_path, context))
-        template_paths.append('%s/%s/flatblock.html' % \
-            tuple(self.resolve(self.modelname, context).lower().split(".")))
+        template_paths = self.GetTemplatesPath(context)
+        template_paths.append("django_generic_flatblocks/object_list.html")
 
         try:
             t = select_template(template_paths)
@@ -210,6 +215,8 @@ class GenericFlatblockListNode(GenericFlatblockBaseNode):
             if settings.TEMPLATE_DEBUG:
                 raise
             return ''
+
+        context['object_model_name'] = self.modelname
         content = t.render(context)
 
         # Set content as variable inside context, if variable_name is given

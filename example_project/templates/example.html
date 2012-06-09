@@ -40,7 +40,7 @@
         your choice,
     {% endcomment %}
     {% gblock "website_urgent_notice" for "gblocks.Text" with "urgent.html" %}
-    {% gblock "website_urgent_notice" for "gblocks.Text"  with "django_generic_flatblocks/object.html"  %}
+    {% gblock "website_urgent_notice" for "gblocks.Text" %}
     
     {% comment %}
         You can pass an integer as slug. In this case, generic-flatblocks
@@ -49,7 +49,7 @@
     {% endcomment %}
     {% gblock 1 for "auth.user" with "current_user.html" %}
 
-    {% glist "test-list" for "django_generic_flatblocks.genericflatblock" with "django_generic_flatblocks/object_list.html" %}
+    {% glist "test-list" for "django_generic_flatblocks.genericflatblock" %}
     
     {% comment %}
         You can store the related object directly in the context using
