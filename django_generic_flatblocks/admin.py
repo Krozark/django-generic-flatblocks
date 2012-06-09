@@ -2,6 +2,7 @@ from django.contrib import admin
 from django.conf import settings
 from django.utils.translation import ugettext_lazy as _
 from django_generic_flatblocks.models import GenericFlatblock, GenericFlatblockList
+from django_generic_flatblocks.forms import GenericFlatblockListForm
 
 class GenericFlatblockAdmin(admin.ModelAdmin):
 
@@ -50,8 +51,10 @@ admin.site.register(GenericFlatblock, GenericFlatblockAdmin)
 class GenericFlatblockListAdmin(admin.ModelAdmin):
 
     list_display = ('modelname','slug')
+    form = GenericFlatblockListForm
 
     def modelname(self,obj):
         return "%s" % self.model
+
 
 admin.site.register(GenericFlatblockList, GenericFlatblockListAdmin)
