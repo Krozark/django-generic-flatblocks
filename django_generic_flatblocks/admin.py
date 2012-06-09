@@ -2,7 +2,7 @@ from django.contrib import admin
 from django.conf import settings
 from django.utils.translation import ugettext_lazy as _
 from django_generic_flatblocks.models import GenericFlatblock, GenericFlatblockList
-from django_generic_flatblocks.forms import GenericFlatblockListForm
+from django_generic_flatblocks.forms import GenericFlatblockListForm, GenericFlatblockForm
 
 class GenericFlatblockAdmin(admin.ModelAdmin):
 
@@ -12,6 +12,7 @@ class GenericFlatblockAdmin(admin.ModelAdmin):
     )
 
     list_display_links = ('slug',)
+    form = GenericFlatblockForm
 
     def related_object_changelink(self, obj):
         return '<a href="%s">%s - %s</a>' % (

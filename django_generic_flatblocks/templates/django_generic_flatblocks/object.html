@@ -1,5 +1,3 @@
-<ul>
-{% for field, value in object.fields.items %}
-    <li>{{ field }}:{{ value }}</li>
-{% endfor %}
-</ul>
+{% with object=generic_object.serialize %}
+    {% include "django_generic_flatblocks/object.inc.html" %}
+{% endwith %}

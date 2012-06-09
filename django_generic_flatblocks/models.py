@@ -10,10 +10,25 @@ class GenericFlatblock(models.Model):
     content_type = models.ForeignKey(ContentType)
     object_id = models.PositiveIntegerField()
     content_object = generic.GenericForeignKey('content_type', 'object_id')
-    #exclude_fields = JSONField(_('fields display in template'),blank=True,null=True)
+    exclude_fields = JSONField(_('fields display in template'),blank=True,null=True)
 
     def __unicode__(self):
         return self.slug
+
+    def model(self):
+        return self.content_type.model_class()
+
+    @property
+    def fields(self):
+        if self.exclude_fields:
+            fields = [u.name for u in self.model()._meta.fields if u.name not in self.exclude_fields]
+        else:
+            fields = [u.name for u in self.model()._meta.fields]
+        return fields
+
+    @property
+    def serialize(self):
+        return serializers.serialize("python", (self.content_object,),fields=self.fields)[0]
 
 class GenericFlatblockList(models.Model):
     slug = models.SlugField(_('slug'), max_length=255, unique=True)
