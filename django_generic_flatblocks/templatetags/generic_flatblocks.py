@@ -21,8 +21,8 @@ class GenericFlatblockBaseNode(Node):
         template_paths = []
         if self.template_path:
             template_paths.append(self.resolve(self.template_path, context))
-        var = (self.resolve(self.modelname, context).lower().split(".")
-        template_paths.append('%s/%s/%s.html' % (var[0],var[1],name)
+        var = self.resolve(self.modelname, context).lower().split(".")
+        template_paths.append('%s/%s/%s.html' % (var[0],var[1],name))
         return template_paths
 
     def generate_slug(self, slug, context):
