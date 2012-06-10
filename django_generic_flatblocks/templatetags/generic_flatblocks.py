@@ -17,11 +17,12 @@ class GenericFlatblockBaseNode(Node):
         self.variable_name = variable_name
         self.store_in_object = store_in_object
     
-    def GetTemplatesPath(self,context):
+    def GetTemplatesPath(self,context,name):
         template_paths = []
         if self.template_path:
             template_paths.append(self.resolve(self.template_path, context))
-        template_paths.append('%s/%s.html' % tuple(self.resolve(self.modelname, context).lower().split(".")))
+        var = (self.resolve(self.modelname, context).lower().split(".")
+        template_paths.append('%s/%s/%s.html' % (var[0],var[1],name)
         return template_paths
 
     def generate_slug(self, slug, context):
@@ -123,7 +124,7 @@ class GenericFlatblockNode(GenericFlatblockBaseNode):
 
 
         # Resolve the template(s)
-        template_paths = self.GetTemplatesPath(context)
+        template_paths = self.GetTemplatesPath(context,'object')
         template_paths.append("django_generic_flatblocks/object.html")
 
         try:
@@ -206,7 +207,7 @@ class GenericFlatblockListNode(GenericFlatblockBaseNode):
         context['object'] = generic_object
 
         # Resolve the template(s)
-        template_paths = self.GetTemplatesPath(context)
+        template_paths = self.GetTemplatesPath(context,"object_list")
         template_paths.append("django_generic_flatblocks/object_list.html")
 
         try:
